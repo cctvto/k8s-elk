@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: tomcat
+  name: tomcat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tomcat
+  template:
+    metadata:
+      labels:
+        app: tomcat
+    spec:
+      tolerations:
+      - key: "node-role.kubernetes.io/master"
+        effect: "NoSchedule"
+      containers:
+      - name: tomcat
+        image: "tomcat:7.0"
+        env:      # 注意点一，添加相应的环境变量（下面收集了两块日志1、stdout 2、/usr/local/tomcat/logs/catalina.*.log）
+        - name: aliyun_logs_tomcat-syslog   # 如日志发送到es，那index名称为 tomcat-syslog
+          value: "stdout"
+        - name: aliyun_logs_tomcat-access   # 如日志发送到es，那index名称为 tomcat-access
+          value: "/usr/local/tomcat/logs/catalina.*.log"
+        volumeMounts:   # 注意点二，对pod内要收集的业务日志目录需要进行共享，可以收集多个目录下的日志文件
+          - name: tomcat-log
+            mountPath: /usr/local/tomcat/logs
+      volumes:
+        - name: tomcat-log
+          emptyDir: {}
