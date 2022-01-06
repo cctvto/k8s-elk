@@ -25,7 +25,7 @@
   2.创建 ZooKeeper 集群 
     ```
   kubectl apply -f https://github.com/cctvto/k8s-elk/blob/main/yaml/zookeeper.yaml
-+ 创建 Kafka 集群
++ 创建 Kafka 集群 
   1.搭建一个包含 3 个节点的 Kafka 集群创建一个 kafka.yaml 文件
    ```
   kubectl apply -f https://github.com/cctvto/k8s-elk/blob/main/yaml/kafka.yaml
