@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    addonmanager.kubernetes.io/mode: Reconcile
+    k8s-app: elasticsearch-logging
+    version: v6.8.13
+  name: elasticsearch-logging
+  # namespace: logging
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      k8s-app: elasticsearch-logging
+      version: v6.8.13
+  serviceName: elasticsearch-logging
+  template:
+    metadata:
+      labels:
+        k8s-app: elasticsearch-logging
+        version: v6.8.13
+    spec:
+      #nodeSelector:
+      #  esnode: "true"  ## 注意给想要运行到的node打上相应labels
+      containers:
+      - env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: cluster.name
+          value: elasticsearch-logging-0
+        - name: ES_JAVA_OPTS
+          value: "-Xms512m -Xmx512m"
+        image: elastic/elasticsearch:6.8.13
+        name: elasticsearch-logging
+        ports:
+        - containerPort: 9200
+          name: db
+          protocol: TCP
+        - containerPort: 9300
+          name: transport
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /usr/share/elasticsearch/data
+          name: elasticsearch-logging
+      dnsConfig:
+        options:
+        - name: single-request-reopen
+      initContainers:
+      - command:
+        - /sbin/sysctl
+        - -w
+        - vm.max_map_count=262144
+        image: alpine:3.12
+        imagePullPolicy: IfNotPresent
+        name: elasticsearch-logging-init
+        resources: {}
+        securityContext:
+          privileged: true
+      - name: fix-permissions
+        image: alpine:3.12
+        command: ["sh", "-c", "chown -R 1000:1000 /usr/share/elasticsearch/data"]
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: elasticsearch-logging
+          mountPath: /usr/share/elasticsearch/data
+      volumes:
+      - name: elasticsearch-logging
+        hostPath:
+          path: /esdata
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    k8s-app: elasticsearch-logging
+  name: elasticsearch
+  # namespace: logging
+spec:
+  ports:
+  - port: 9200
+    protocol: TCP
+    targetPort: db
+  selector:
+    k8s-app: elasticsearch-logging
+  type: ClusterIP

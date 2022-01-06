@@ -1,0 +1,13 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pvc-sc
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "nfs-boge"
+spec:
+  storageClassName: nfs-boge
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Mi
