@@ -13,32 +13,18 @@
   #重启服务
   systemctl restart rpcbind
   systemctl restart nfs
-  systemctl enable nfs
+  systemctl enable nfs rpcbind
   #测试nfs功能
   showmount -e 10.10.10.222
 + 创建ZooKeeper集群
-  1.创建pv
+  1.创建pv (zookeeper-pv.yaml)
   ```yaml
-  apiVersion: v1
-  kind: PersistentVolume
-  metadata:
-    name: k8s-pv-zk01
-    labels:
-      app: zk
-    annotations:
-      volume.beta.kubernetes.io/storage-class: "anything"
-  spec:
-    capacity:
-      storage: 1Gi
-    accessModes:
-      - ReadWriteOnce
-    nfs:
-      server: 10.10.10.220
-      path: "/nfs_dir/zookeeper/pv1"
-    persistentVolumeReclaimPolicy: Recycle  
+  kubectl apply -f https://github.com/cctvto/k8s-elk/blob/main/yaml/zookeeper-pv.yaml  
   ```
   2.创建 ZooKeeper 集群 
     ```
-     zookeeper.yaml 
+  kubectl apply -f https://github.com/cctvto/k8s-elk/blob/main/yaml/zookeeper.yaml
 + 创建 Kafka 集群
   1.搭建一个包含 3 个节点的 Kafka 集群创建一个 kafka.yaml 文件
+   ```
+  kubectl apply -f https://github.com/cctvto/k8s-elk/blob/main/yaml/kafka.yaml
