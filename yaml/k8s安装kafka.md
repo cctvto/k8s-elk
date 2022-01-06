@@ -16,9 +16,10 @@
   systemctl enable nfs rpcbind
   #测试nfs功能
   showmount -e 10.10.10.222
-+ 创建ZooKeeper集群
++ 创建ZooKeeper集群 
+
   1.创建pv (zookeeper-pv.yaml)
-  ```yaml
+  ```
   kubectl apply -f https://github.com/cctvto/k8s-elk/blob/main/yaml/zookeeper-pv.yaml  
   ```
   2.创建 ZooKeeper 集群 
